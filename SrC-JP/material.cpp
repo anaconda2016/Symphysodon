@@ -55,8 +55,7 @@ namespace {
 
   // Endgame evaluation and scaling functions are accessed directly and not through
   // the function maps because they correspond to more than one material hash key.
-  Endgame<KXK>    EvaluateKXK[]  = { Endgame<KXK>(WHITE),   Endgame<KXK>(BLACK) };
-  Endgame<KmKm>   EvaluateKmKm[] = { Endgame<KmKm>(WHITE),  Endgame<KmKm>(BLACK) };
+  Endgame<KXK>    EvaluateKXK[] = { Endgame<KXK>(WHITE),    Endgame<KXK>(BLACK) };
 
   Endgame<KBPsK>  ScaleKBPsK[]  = { Endgame<KBPsK>(WHITE),  Endgame<KBPsK>(BLACK) };
   Endgame<KQKRPs> ScaleKQKRPs[] = { Endgame<KQKRPs>(WHITE), Endgame<KQKRPs>(BLACK) };
@@ -64,12 +63,6 @@ namespace {
   Endgame<KPKP>   ScaleKPKP[]   = { Endgame<KPKP>(WHITE),   Endgame<KPKP>(BLACK) };
 
   // Helper used to detect a given material distribution
-  bool is_KmKm(const Position& pos, Color us) {
-    return  !pos.pieces(PAWN)
-          && pos.non_pawn_material( us) <= BishopValueMg
-          && pos.non_pawn_material(~us) <= BishopValueMg;
-  }
-
   bool is_KXK(const Position& pos, Color us) {
     return  !more_than_one(pos.pieces(~us))
           && pos.non_pawn_material(us) >= RookValueMg;
@@ -145,12 +138,7 @@ Entry* probe(const Position& pos) {
       return e;
 
   for (Color c = WHITE; c <= BLACK; ++c)
-      if (is_KmKm(pos, c))
-      {
-          e->evaluationFunction = &EvaluateKmKm[c];
-          return e;
-      }
-      else if (is_KXK(pos, c))
+      if (is_KXK(pos, c))
       {
           e->evaluationFunction = &EvaluateKXK[c];
           return e;
@@ -225,10 +213,10 @@ Entry* probe(const Position& pos) {
   // for the bishop pair "extended piece", which allows us to be more flexible
   // in defining bishop pair bonuses.
   const int PieceCount[COLOR_NB][PIECE_TYPE_NB] = {
-  { pos.bishop_pair(WHITE)  , pos.count<PAWN>(WHITE), pos.count<KNIGHT>(WHITE),
-    pos.count<BISHOP>(WHITE), pos.count<ROOK>(WHITE), pos.count<QUEEN >(WHITE) },
-  { pos.bishop_pair(BLACK)  , pos.count<PAWN>(BLACK), pos.count<KNIGHT>(BLACK),
-    pos.count<BISHOP>(BLACK), pos.count<ROOK>(BLACK), pos.count<QUEEN >(BLACK) } };
+  { pos.count<BISHOP>(WHITE) > 1, pos.count<PAWN>(WHITE), pos.count<KNIGHT>(WHITE),
+    pos.count<BISHOP>(WHITE)    , pos.count<ROOK>(WHITE), pos.count<QUEEN >(WHITE) },
+  { pos.count<BISHOP>(BLACK) > 1, pos.count<PAWN>(BLACK), pos.count<KNIGHT>(BLACK),
+    pos.count<BISHOP>(BLACK)    , pos.count<ROOK>(BLACK), pos.count<QUEEN >(BLACK) } };
 
   e->value = int16_t((imbalance<WHITE>(PieceCount) - imbalance<BLACK>(PieceCount)) / 16);
   return e;

@@ -766,7 +766,7 @@ void Position::do_move(Move m, StateInfo& newSt, bool givesCheck) {
       st->psq -= PSQT::psq[captured][capsq];
 
       // Reset rule 50 counter
-      if (st->rule50 < 101) st->rule50 = 0;
+      st->rule50 = 0;
   }
 
   // Update hash key
@@ -830,7 +830,7 @@ void Position::do_move(Move m, StateInfo& newSt, bool givesCheck) {
       prefetch(thisThread->pawnsTable[st->pawnKey]);
 
       // Reset rule 50 draw counter
-      if (st->rule50 < 101) st->rule50 = 0;
+      st->rule50 = 0;
   }
 
   // Update incremental scores
@@ -996,9 +996,9 @@ Key Position::key_after(Move m) const {
 }
 
 
-/// Position::see_ge() tests if the SEE value of move is greater or equal to
-/// the given value (Static Exchange Evaluation Greater or Equal). We're using
-/// an algorithm similar to alpha-beta pruning with a null window.
+/// Position::see_ge (Static Exchange Evaluation Greater or Equal) tests if the
+/// SEE value of move is greater or equal to the given value. We'll use an
+/// algorithm similar to alpha-beta pruning with a null window.
 
 bool Position::see_ge(Move m, Value v) const {
 
@@ -1086,7 +1086,7 @@ bool Position::is_draw(int ply) const {
 
   int end = std::min(st->rule50, st->pliesFromNull);
 
-  if (end < 4) // Return immediately
+  if (end < 4)
     return false;
 
   StateInfo* stp = st->previous->previous;
@@ -1097,10 +1097,10 @@ bool Position::is_draw(int ply) const {
       stp = stp->previous->previous;
 
       // At root position ply is 1, so return a draw score if a position
-      // repeats once earlier but strictly after the root, or repeats twice
-      // before or at the root.
+      // repeats once earlier but after or at the root, or repeats twice
+      // strictly before the root.
       if (   stp->key == st->key
-          && ++cnt + (ply - i > 1) == 2)
+          && ++cnt + (ply - i > 0) == 2)
           return true;
   }
 
